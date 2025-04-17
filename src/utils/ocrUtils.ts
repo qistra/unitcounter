@@ -1,4 +1,3 @@
-
 import { recognizeTextFromImage } from '@/lib/ocrProcessor';
 
 /**
@@ -8,15 +7,24 @@ import { recognizeTextFromImage } from '@/lib/ocrProcessor';
  */
 export const processImageOCR = async (file: File): Promise<string> => {
   try {
+    console.log('Processing image with OCR:', file);
+    
     if (!file || !file.type.startsWith('image/')) {
       throw new Error('Invalid file type. Please upload an image.');
+    }
+    
+    // Check file size
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE) {
+      console.warn('Image is large, may affect performance:', file.size);
     }
     
     // Use the real OCR implementation
     const result = await recognizeTextFromImage(file);
     
-    if (!result) {
+    if (!result || result.trim() === '') {
       // If OCR couldn't detect any numbers, provide feedback
+      console.warn('No reading detected in the image');
       throw new Error('No meter reading detected. Please try with a clearer image or enter reading manually.');
     }
     

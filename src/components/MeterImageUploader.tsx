@@ -1,10 +1,12 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { processImageOCR, createImagePreview, validateReading } from "@/utils/ocrUtils";
-import { Loader2, Camera, AlertCircle, Check } from "lucide-react";
+import { Loader2, Camera, AlertCircle, Check, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface MeterImageUploaderProps {
@@ -17,9 +19,52 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
   const [preview, setPreview] = useState<string>('');
   const [reading, setReading] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [modelLoading, setModelLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [ocrSuccess, setOcrSuccess] = useState(false);
   const { toast } = useToast();
+
+  const processImage = async (file: File) => {
+    if (!file) return;
+    
+    setIsProcessing(true);
+    setModelLoading(true);
+    setError('');
+    setOcrSuccess(false);
+    
+    try {
+      console.log("Starting OCR process for file:", file.name);
+      // Small delay to ensure UI updates before heavy processing begins
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const result = await processImageOCR(file);
+      console.log("OCR process completed, result:", result);
+      
+      setReading(result);
+      onReadingChange(result);
+      setIsProcessing(false);
+      setModelLoading(false);
+      setOcrSuccess(true);
+      
+      toast({
+        title: "OCR Successful",
+        description: `Detected reading: ${result}`,
+        variant: "default"
+      });
+    } catch (err) {
+      console.error("OCR process failed:", err);
+      const errorMessage = err instanceof Error ? err.message : 'Error processing image';
+      setError(errorMessage);
+      setIsProcessing(false);
+      setModelLoading(false);
+      
+      toast({
+        title: "OCR Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,31 +72,7 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
     
     setSelectedFile(file);
     setPreview(createImagePreview(file));
-    setError('');
-    setIsProcessing(true);
-    setOcrSuccess(false);
-    
-    try {
-      const result = await processImageOCR(file);
-      setReading(result);
-      onReadingChange(result);
-      setIsProcessing(false);
-      setOcrSuccess(true);
-      toast({
-        title: "OCR Successful",
-        description: `Detected reading: ${result}`,
-        variant: "default"
-      });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error processing image';
-      setError(errorMessage);
-      setIsProcessing(false);
-      toast({
-        title: "OCR Failed",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    }
+    processImage(file);
   };
 
   const handleReadingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +86,19 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
       setError('Please enter a valid positive number');
     }
   };
+  
+  const handleRetry = () => {
+    if (selectedFile) {
+      processImage(selectedFile);
+    }
+  };
+
+  // Clean up object URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
 
   return (
     <div className="space-y-4">
@@ -89,6 +123,17 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
                   <Camera className="h-4 w-4 mr-1" />
                   Change Image
                 </Button>
+                {selectedFile && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleRetry}
+                    disabled={isProcessing}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-1 ${isProcessing ? 'animate-spin' : ''}`} />
+                    Retry OCR
+                  </Button>
+                )}
               </div>
             </div>
           ) : (
@@ -111,6 +156,10 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
             accept="image/*"
             className="hidden"
             onChange={handleFileChange}
+            onClick={(e) => {
+              // Reset value to allow selecting the same file again
+              (e.target as HTMLInputElement).value = '';
+            }}
           />
         </Card>
         
@@ -149,6 +198,15 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
             <p className="text-xs text-muted-foreground mt-1">
               You can always adjust the reading if OCR is not accurate
             </p>
+          )}
+          
+          {modelLoading && (
+            <Alert className="mt-2 bg-blue-50">
+              <AlertDescription className="flex items-center">
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Loading OCR model... This may take a moment on first use.
+              </AlertDescription>
+            </Alert>
           )}
         </div>
       </div>
