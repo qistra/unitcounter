@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { processImageOCR, createImagePreview, validateReading } from "@/utils/ocrUtils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Camera, AlertCircle, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface MeterImageUploaderProps {
   label: string;
@@ -18,6 +19,8 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
   const [reading, setReading] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string>('');
+  const [ocrSuccess, setOcrSuccess] = useState(false);
+  const { toast } = useToast();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,15 +30,28 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
     setPreview(createImagePreview(file));
     setError('');
     setIsProcessing(true);
+    setOcrSuccess(false);
     
     try {
       const result = await processImageOCR(file);
       setReading(result);
       onReadingChange(result);
       setIsProcessing(false);
+      setOcrSuccess(true);
+      toast({
+        title: "OCR Successful",
+        description: `Detected reading: ${result}`,
+        variant: "default"
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error processing image');
+      const errorMessage = err instanceof Error ? err.message : 'Error processing image';
+      setError(errorMessage);
       setIsProcessing(false);
+      toast({
+        title: "OCR Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
     }
   };
 
@@ -65,13 +81,16 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
                   className="w-full h-full object-contain"
                 />
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => document.getElementById(`${label}-upload`)?.click()}
-              >
-                Change Image
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => document.getElementById(`${label}-upload`)?.click()}
+                >
+                  <Camera className="h-4 w-4 mr-1" />
+                  Change Image
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="text-center">
@@ -82,6 +101,7 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
                 variant="outline"
                 onClick={() => document.getElementById(`${label}-upload`)?.click()}
               >
+                <Camera className="h-4 w-4 mr-1" />
                 Choose file
               </Button>
             </div>
@@ -111,11 +131,26 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               </div>
             )}
+            {ocrSuccess && !isProcessing && (
+              <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                <Check className="h-4 w-4 text-green-500" />
+              </div>
+            )}
+            {error && !isProcessing && (
+              <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                <AlertCircle className="h-4 w-4 text-red-500" />
+              </div>
+            )}
           </div>
           {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
           <p className="text-sm text-muted-foreground mt-1">
             {selectedFile ? selectedFile.name : "No file chosen"}
           </p>
+          {selectedFile && (
+            <p className="text-xs text-muted-foreground mt-1">
+              You can always adjust the reading if OCR is not accurate
+            </p>
+          )}
         </div>
       </div>
     </div>

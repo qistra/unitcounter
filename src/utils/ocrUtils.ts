@@ -1,31 +1,30 @@
 
-// OCR Utility Functions
-// In a real application, this would use @huggingface/transformers for actual OCR
-// This is a simplified simulation for demo purposes
+import { recognizeTextFromImage } from '@/lib/ocrProcessor';
 
 /**
- * Simulates OCR processing on an uploaded meter image
+ * Process an uploaded meter image using OCR
  * @param file The image file to process
- * @returns A promise that resolves to a random meter reading number
+ * @returns A promise that resolves to the recognized meter reading
  */
 export const processImageOCR = async (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    // Simulate OCR processing time
-    setTimeout(() => {
-      try {
-        if (!file || !file.type.startsWith('image/')) {
-          throw new Error('Invalid file type. Please upload an image.');
-        }
-        
-        // In a real app, we would use the transformers library here
-        // This is just a simulation that returns a random number
-        const randomReading = (Math.random() * 10000).toFixed(2);
-        resolve(randomReading);
-      } catch (error) {
-        reject(error);
-      }
-    }, 1500); // Simulate processing delay
-  });
+  try {
+    if (!file || !file.type.startsWith('image/')) {
+      throw new Error('Invalid file type. Please upload an image.');
+    }
+    
+    // Use the real OCR implementation
+    const result = await recognizeTextFromImage(file);
+    
+    if (!result) {
+      // If OCR couldn't detect any numbers, provide feedback
+      throw new Error('No meter reading detected. Please try with a clearer image or enter reading manually.');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('OCR processing error:', error);
+    throw error;
+  }
 };
 
 /**
