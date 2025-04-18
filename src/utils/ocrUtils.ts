@@ -1,8 +1,8 @@
 
-import { recognizeTextFromImage } from '@/lib/ocrProcessor';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Process an uploaded meter image using OCR
+ * Process an uploaded meter image using OCR via Supabase Edge Function
  * @param file The image file to process
  * @returns A promise that resolves to the recognized meter reading
  */
@@ -20,8 +20,18 @@ export const processImageOCR = async (file: File): Promise<string> => {
       console.warn('Image is large, may affect processing:', file.size);
     }
     
-    // Use the DeepSeek OCR implementation
-    const result = await recognizeTextFromImage(file);
+    // Create FormData to send the file
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    // Call Supabase Edge Function for OCR
+    const { data, error } = await supabase.functions.invoke('ocr-process', {
+      body: formData
+    });
+    
+    if (error) throw error;
+    
+    const result = data.numericValue;
     
     if (!result || result.trim() === '') {
       // If OCR couldn't detect any numbers, provide feedback
