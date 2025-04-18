@@ -1,10 +1,9 @@
-
 /**
  * DeepSeek-based OCR processor for meter readings
  */
 
-// API key will be provided by the user
-const DEEPSEEK_API_KEY = "YOUR_DEEPSEEK_API_KEY"; // Replace this with actual API key
+// DeepSeek API key is now set dynamically
+const DEEPSEEK_API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || "";
 
 /**
  * Process an image file with DeepSeek OCR to extract meter readings
@@ -12,6 +11,10 @@ const DEEPSEEK_API_KEY = "YOUR_DEEPSEEK_API_KEY"; // Replace this with actual AP
  * @returns Promise resolving to the recognized meter reading
  */
 export const recognizeTextFromImage = async (imageFile: File): Promise<string> => {
+  if (!DEEPSEEK_API_KEY) {
+    throw new Error('DeepSeek API key is missing. Please provide a valid API key.');
+  }
+  
   try {
     console.log('Starting DeepSeek OCR processing for file:', imageFile.name);
     
