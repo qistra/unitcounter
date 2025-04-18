@@ -1,3 +1,4 @@
+
 import { recognizeTextFromImage } from '@/lib/ocrProcessor';
 
 /**
@@ -7,7 +8,7 @@ import { recognizeTextFromImage } from '@/lib/ocrProcessor';
  */
 export const processImageOCR = async (file: File): Promise<string> => {
   try {
-    console.log('Processing image with OCR:', file);
+    console.log('Processing image with DeepSeek OCR:', file);
     
     if (!file || !file.type.startsWith('image/')) {
       throw new Error('Invalid file type. Please upload an image.');
@@ -16,10 +17,10 @@ export const processImageOCR = async (file: File): Promise<string> => {
     // Check file size
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     if (file.size > MAX_FILE_SIZE) {
-      console.warn('Image is large, may affect performance:', file.size);
+      console.warn('Image is large, may affect processing:', file.size);
     }
     
-    // Use the real OCR implementation
+    // Use the DeepSeek OCR implementation
     const result = await recognizeTextFromImage(file);
     
     if (!result || result.trim() === '') {

@@ -1,67 +1,61 @@
 
-import { pipeline, env } from '@huggingface/transformers';
-
-// Configure transformers.js settings for optimal browser performance
-env.allowLocalModels = false;
-env.useBrowserCache = true;
-env.backends.onnx.wasm.numThreads = 4;
-
-// Initialize the OCR model - will load on first use
-let ocrModelPromise: Promise<any> | null = null;
-
 /**
- * Initialize the OCR pipeline once
+ * DeepSeek-based OCR processor for meter readings
  */
-const getOcrPipeline = async () => {
-  if (!ocrModelPromise) {
-    console.log('Loading OCR model...');
-    try {
-      // Create a new promise for loading the model
-      ocrModelPromise = pipeline('image-to-text', 'Xenova/vit-gpt2-image-captioning', {
-        revision: 'v2.0.0',
-      });
-      console.log('OCR model loaded successfully');
-    } catch (error) {
-      console.error('Error loading OCR model:', error);
-      ocrModelPromise = null;
-      throw new Error('Failed to load OCR model. Please try again later.');
-    }
-  }
-  return ocrModelPromise;
-};
+
+// API key will be provided by the user
+const DEEPSEEK_API_KEY = "YOUR_DEEPSEEK_API_KEY"; // Replace this with actual API key
 
 /**
- * Process an image file with OCR to extract meter readings
+ * Process an image file with DeepSeek OCR to extract meter readings
  * @param imageFile The image file to process
  * @returns Promise resolving to the recognized meter reading
  */
 export const recognizeTextFromImage = async (imageFile: File): Promise<string> => {
   try {
-    console.log('Starting OCR processing for file:', imageFile.name);
+    console.log('Starting DeepSeek OCR processing for file:', imageFile.name);
     
-    // Get image data as base64
-    const imageBase64 = await fileToBase64(imageFile);
-    console.log('Image converted to base64');
+    // Convert the file to base64
+    const base64Image = await fileToBase64(imageFile);
+    const base64Data = base64Image.split(',')[1]; // Remove the data:image/format;base64, prefix
     
-    // Get OCR pipeline
-    console.log('Getting OCR pipeline...');
-    const model = await getOcrPipeline();
+    console.log('Image converted to base64, sending to DeepSeek API');
     
-    // Process the image
-    console.log('Processing image with OCR model...');
-    const result = await model(imageBase64);
-    console.log('OCR result:', result);
+    // Call DeepSeek API
+    const response = await fetch('https://api.deepseek.com/v1/vision/detect_text', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        image: base64Data,
+        options: {
+          language: "auto"  // Auto detect language
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('DeepSeek API error:', errorData);
+      throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('DeepSeek OCR response:', data);
     
-    // Extract the detected text
+    // Extract the detected text from DeepSeek response
     let detectedText = '';
-    if (result && result.length > 0) {
-      detectedText = result[0].generated_text || '';
+    if (data && data.text) {
+      detectedText = data.text;
       console.log('Detected text:', detectedText);
     }
     
     // Extract numeric values from the text
     const numericValue = extractNumberFromText(detectedText);
     console.log('Extracted numeric value:', numericValue);
+    
     return numericValue || '';
   } catch (error) {
     console.error('OCR processing error:', error);
