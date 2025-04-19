@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,16 +6,20 @@ import { calculateUsage, validateReading } from "@/utils/ocrUtils";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, AlertCircle } from "lucide-react";
 
-export function IndividualUsageCalculator() {
+interface IndividualUsageCalculatorProps {
+  onUsageCalculated: (usage: number | null) => void;
+}
+
+export function IndividualUsageCalculator({ onUsageCalculated }: IndividualUsageCalculatorProps) {
   const [startReading, setStartReading] = useState("");
   const [endReading, setEndReading] = useState("");
-  const [usage, setUsage] = useState<number | null>(null);
   const [error, setError] = useState("");
-  const [calculated, setCalculated] = useState(false);
+  const [showResult, setShowResult] = useState(false);
 
   const handleCalculate = () => {
     setError("");
-    setCalculated(false);
+    setShowResult(false);
+    onUsageCalculated(null);
     
     if (!startReading || !endReading) {
       setError("Please provide both start and end readings");
@@ -33,10 +36,11 @@ export function IndividualUsageCalculator() {
     
     try {
       const result = calculateUsage(start, end);
-      setUsage(result);
-      setCalculated(true);
+      onUsageCalculated(result);
+      setShowResult(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Calculation error");
+      onUsageCalculated(null);
     }
   };
 
@@ -48,12 +52,18 @@ export function IndividualUsageCalculator() {
       <CardContent className="space-y-6">
         <MeterImageUploader 
           label="Start Meter Reading" 
-          onReadingChange={setStartReading} 
+          onReadingChange={(value) => {
+            setStartReading(value);
+            setShowResult(false);
+          }} 
         />
         
         <MeterImageUploader 
           label="End Meter Reading" 
-          onReadingChange={setEndReading} 
+          onReadingChange={(value) => {
+            setEndReading(value);
+            setShowResult(false);
+          }} 
         />
         
         {error && (
@@ -64,12 +74,12 @@ export function IndividualUsageCalculator() {
           </Alert>
         )}
         
-        {calculated && usage !== null && (
+        {showResult && !error && (
           <Alert className="bg-green-50 text-green-800 border-green-200">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertTitle>Calculation Result</AlertTitle>
             <AlertDescription className="font-semibold">
-              Your electricity usage is: {usage.toFixed(2)} kWh
+              Your electricity usage is: {calculateUsage(parseFloat(startReading), parseFloat(endReading)).toFixed(2)} kWh
             </AlertDescription>
           </Alert>
         )}

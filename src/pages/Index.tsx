@@ -1,11 +1,11 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IndividualUsageCalculator } from "@/components/IndividualUsageCalculator";
 import { SharedUsageCalculator } from "@/components/SharedUsageCalculator";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("individual");
+  const [personalUsage, setPersonalUsage] = useState<number | null>(null);
   
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -31,11 +31,11 @@ const Index = () => {
           </div>
           
           <TabsContent value="individual" className="mt-0">
-            <IndividualUsageCalculator />
+            <IndividualUsageCalculator onUsageCalculated={setPersonalUsage} />
           </TabsContent>
           
           <TabsContent value="shared" className="mt-0">
-            <SharedUsageCalculator />
+            <SharedUsageCalculator personalUsage={personalUsage} />
           </TabsContent>
         </Tabs>
         
