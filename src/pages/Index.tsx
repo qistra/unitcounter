@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IndividualUsageCalculator } from "@/components/IndividualUsageCalculator";
@@ -8,11 +9,11 @@ const Index = () => {
   const [personalUsage, setPersonalUsage] = useState<number | null>(null);
   
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
       <div className="container px-4 mx-auto max-w-3xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">WattShare - Electricity Usage Calculator</h1>
-          <p className="text-gray-600">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">WattShare - Electricity Usage Calculator</h1>
+          <p className="text-gray-600 text-sm sm:text-base">
             Upload meter readings and calculate your electricity usage
           </p>
         </div>
@@ -23,7 +24,7 @@ const Index = () => {
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4 sm:mb-6">
             <TabsList className="grid w-full max-w-md grid-cols-2">
               <TabsTrigger value="individual">Individual Usage</TabsTrigger>
               <TabsTrigger value="shared">Shared Usage</TabsTrigger>
@@ -39,7 +40,7 @@ const Index = () => {
           </TabsContent>
         </Tabs>
         
-        <div className="mt-8 text-center text-sm text-gray-500">
+        <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-gray-500">
           <p>
             WattShare helps you manage and calculate electricity usage from meter readings.
           </p>

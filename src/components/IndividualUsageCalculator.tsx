@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,10 +47,10 @@ export function IndividualUsageCalculator({ onUsageCalculated }: IndividualUsage
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Individual Meter Usage</CardTitle>
+      <CardHeader className="pb-3 sm:pb-6">
+        <CardTitle className="text-lg sm:text-xl">Individual Meter Usage</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6">
         <MeterImageUploader 
           label="Start Meter Reading" 
           onReadingChange={(value) => {
@@ -70,7 +71,7 @@ export function IndividualUsageCalculator({ onUsageCalculated }: IndividualUsage
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="text-sm">{error}</AlertDescription>
           </Alert>
         )}
         
@@ -78,7 +79,7 @@ export function IndividualUsageCalculator({ onUsageCalculated }: IndividualUsage
           <Alert className="bg-green-50 text-green-800 border-green-200">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertTitle>Calculation Result</AlertTitle>
-            <AlertDescription className="font-semibold">
+            <AlertDescription className="font-semibold text-sm">
               Your electricity usage is: {calculateUsage(parseFloat(startReading), parseFloat(endReading)).toFixed(2)} kWh
             </AlertDescription>
           </Alert>
@@ -86,7 +87,7 @@ export function IndividualUsageCalculator({ onUsageCalculated }: IndividualUsage
       </CardContent>
       <CardFooter>
         <Button 
-          className="w-full bg-primary hover:bg-primary/90" 
+          className="w-full bg-primary hover:bg-primary/90 text-sm sm:text-base py-2 sm:py-3" 
           onClick={handleCalculate}
           disabled={!startReading || !endReading}
         >

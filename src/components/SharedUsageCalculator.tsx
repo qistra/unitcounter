@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,12 +74,12 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Shared Electricity Usage</CardTitle>
+      <CardHeader className="pb-3 sm:pb-6">
+        <CardTitle className="text-lg sm:text-xl">Shared Electricity Usage</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="initiallyRechargedUnits">Initially Recharged Units (kWh)</Label>
+          <Label htmlFor="initiallyRechargedUnits" className="text-sm">Initially Recharged Units (kWh)</Label>
           <Input
             id="initiallyRechargedUnits"
             type="number"
@@ -86,6 +87,7 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
             value={initiallyRechargedUnits}
             onChange={(e) => setInitiallyRechargedUnits(e.target.value)}
             placeholder="Enter initially recharged units"
+            className="text-sm"
           />
         </div>
         
@@ -95,7 +97,7 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
         />
         
         <div className="space-y-2">
-          <Label htmlFor="personalUsage">Your Personal Usage (kWh)</Label>
+          <Label htmlFor="personalUsage" className="text-sm">Your Personal Usage (kWh)</Label>
           <Input
             id="personalUsage"
             type="number"
@@ -103,10 +105,10 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
             value={manualPersonalUsage || (personalUsage?.toString() || "")}
             onChange={(e) => setManualPersonalUsage(e.target.value)}
             placeholder={personalUsage ? `Auto-filled: ${personalUsage.toFixed(2)}` : "Enter your personal usage"}
-            className={personalUsage && !manualPersonalUsage ? "bg-gray-50" : ""}
+            className={`text-sm ${personalUsage && !manualPersonalUsage ? "bg-gray-50" : ""}`}
           />
           {personalUsage && !manualPersonalUsage && (
-            <p className="text-sm text-gray-500 mt-1">Auto-filled from Individual tab calculation</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Auto-filled from Individual tab calculation</p>
           )}
         </div>
         
@@ -114,7 +116,7 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="text-sm">{error}</AlertDescription>
           </Alert>
         )}
         
@@ -122,7 +124,7 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
           <Alert key={index} variant="warning" className="bg-yellow-50 text-yellow-800 border-yellow-200">
             <AlertTriangle className="h-4 w-4 text-yellow-600" />
             <AlertTitle>Warning</AlertTitle>
-            <AlertDescription>{warning}</AlertDescription>
+            <AlertDescription className="text-sm">{warning}</AlertDescription>
           </Alert>
         ))}
         
@@ -131,7 +133,7 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertTitle>Calculation Result</AlertTitle>
             <AlertDescription>
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2 text-sm">
                 <p className="font-semibold">Total Shared Usage: {calculationResult.totalSharedUsage.toFixed(2)} kWh</p>
                 <p className="font-semibold">Your Usage: {calculationResult.effectivePersonalUsage.toFixed(2)} kWh</p>
                 <p className="font-semibold">Other's Usage: {calculationResult.othersUsage.toFixed(2)} kWh</p>
@@ -142,7 +144,7 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
       </CardContent>
       <CardFooter>
         <Button 
-          className="w-full bg-primary hover:bg-primary/90" 
+          className="w-full bg-primary hover:bg-primary/90 text-sm sm:text-base py-2 sm:py-3" 
           onClick={handleCalculate}
           disabled={!initiallyRechargedUnits || !currentRemainingUnits}
         >
