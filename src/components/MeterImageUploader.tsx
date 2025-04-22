@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -33,6 +34,7 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
     
     try {
       console.log("Starting OCR process for file:", file.name);
+      // Small delay to ensure UI updates before heavy processing begins
       await new Promise(resolve => setTimeout(resolve, 100));
       
       const result = await processImageOCR(file);
@@ -91,6 +93,7 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
     }
   };
 
+  // Clean up object URLs when component unmounts
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
@@ -98,13 +101,13 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
   }, [preview]);
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-4">
       <Label htmlFor={`${label}-upload`}>{label}</Label>
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <Card className="flex-1 p-4 border-dashed border-2 flex flex-col items-center justify-center min-h-[150px] sm:min-h-[200px]">
+      <div className="flex flex-col md:flex-row gap-4">
+        <Card className="flex-1 p-4 border-dashed border-2 flex flex-col items-center justify-center min-h-[200px]">
           {preview ? (
             <div className="w-full h-full flex flex-col items-center">
-              <div className="relative w-full h-24 sm:h-32 mb-2">
+              <div className="relative w-full h-32 mb-2">
                 <img 
                   src={preview} 
                   alt="Meter preview" 
@@ -118,7 +121,7 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
                   onClick={() => document.getElementById(`${label}-upload`)?.click()}
                 >
                   <Camera className="h-4 w-4 mr-1" />
-                  Change
+                  Change Image
                 </Button>
                 {selectedFile && (
                   <Button 
@@ -128,23 +131,21 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
                     disabled={isProcessing}
                   >
                     <RefreshCw className={`h-4 w-4 mr-1 ${isProcessing ? 'animate-spin' : ''}`} />
-                    Retry
+                    Retry OCR
                   </Button>
                 )}
               </div>
             </div>
           ) : (
             <div className="text-center">
-              <p className="text-xs sm:text-sm text-muted-foreground mb-2">
+              <p className="text-sm text-muted-foreground mb-2">
                 Upload your meter image
               </p>
               <Button 
                 variant="outline"
-                size="sm"
-                className="sm:text-sm"
                 onClick={() => document.getElementById(`${label}-upload`)?.click()}
               >
-                <Camera className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <Camera className="h-4 w-4 mr-1" />
                 Choose file
               </Button>
             </div>
@@ -156,13 +157,14 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
             className="hidden"
             onChange={handleFileChange}
             onClick={(e) => {
+              // Reset value to allow selecting the same file again
               (e.target as HTMLInputElement).value = '';
             }}
           />
         </Card>
         
         <div className="flex-1">
-          <Label htmlFor={`${label}-reading`} className="block text-sm mb-1">OCR Result</Label>
+          <Label htmlFor={`${label}-reading`}>OCR Result</Label>
           <div className="relative">
             <Input
               id={`${label}-reading`}
@@ -170,7 +172,7 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
               onChange={handleReadingChange}
               placeholder="Reading"
               disabled={isProcessing}
-              className={`text-sm ${error ? "border-red-500" : ""}`}
+              className={error ? "border-red-500" : ""}
             />
             {isProcessing && (
               <div className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -188,21 +190,21 @@ export function MeterImageUploader({ label, onReadingChange }: MeterImageUploade
               </div>
             )}
           </div>
-          {error && <p className="text-xs sm:text-sm text-red-500 mt-1">{error}</p>}
-          <p className="text-xs text-muted-foreground mt-1">
+          {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+          <p className="text-sm text-muted-foreground mt-1">
             {selectedFile ? selectedFile.name : "No file chosen"}
           </p>
           {selectedFile && (
-            <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
+            <p className="text-xs text-muted-foreground mt-1">
               You can always adjust the reading if OCR is not accurate
             </p>
           )}
           
           {modelLoading && (
-            <Alert className="mt-2 bg-blue-50 py-2">
-              <AlertDescription className="flex items-center text-xs">
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Loading OCR model...
+            <Alert className="mt-2 bg-blue-50">
+              <AlertDescription className="flex items-center">
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Loading OCR model... This may take a moment on first use.
               </AlertDescription>
             </Alert>
           )}
