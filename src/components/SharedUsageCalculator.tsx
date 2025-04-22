@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -86,6 +87,7 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
             value={initiallyRechargedUnits}
             onChange={(e) => setInitiallyRechargedUnits(e.target.value)}
             placeholder="Enter initially recharged units"
+            className="w-full"
           />
         </div>
         
@@ -103,10 +105,10 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
             value={manualPersonalUsage || (personalUsage?.toString() || "")}
             onChange={(e) => setManualPersonalUsage(e.target.value)}
             placeholder={personalUsage ? `Auto-filled: ${personalUsage.toFixed(2)}` : "Enter your personal usage"}
-            className={personalUsage && !manualPersonalUsage ? "bg-gray-50" : ""}
+            className={personalUsage && !manualPersonalUsage ? "bg-gray-50 w-full" : "w-full"}
           />
           {personalUsage && !manualPersonalUsage && (
-            <p className="text-sm text-gray-500 mt-1">Auto-filled from Individual tab calculation</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Auto-filled from Individual tab calculation</p>
           )}
         </div>
         
@@ -119,7 +121,7 @@ export function SharedUsageCalculator({ personalUsage }: SharedUsageCalculatorPr
         )}
         
         {warnings.map((warning, index) => (
-          <Alert key={index} variant="warning" className="bg-yellow-50 text-yellow-800 border-yellow-200">
+          <Alert key={index} className="bg-yellow-50 text-yellow-800 border-yellow-200">
             <AlertTriangle className="h-4 w-4 text-yellow-600" />
             <AlertTitle>Warning</AlertTitle>
             <AlertDescription>{warning}</AlertDescription>
